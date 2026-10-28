@@ -1,0 +1,10 @@
+# Python 3.13. Versions used for the local installation check.
+streamlit==1.66.1
+geopandas==1.1.2
+numpy==2.2.4
+pandas==2.2.3
+pyarrow==23.0.1
+pyogrio==0.12.1
+pywaterinfo==0.8.1
+rasterio==1.5.0
+shapely==2.1.2
