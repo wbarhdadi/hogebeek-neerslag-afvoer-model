@@ -49,36 +49,3 @@ Installeer hiervoor ook `whitebox` in dezelfde Python-omgeving:
 ```
 
 Whitebox downloadt bij het eerste gebruik zijn rekenprogramma; daarvoor is internet nodig.
-
-## Naar GitHub en Streamlit Cloud
-
-Installeer [Git](https://git-scm.com/downloads) en maak op GitHub een **lege repository** (zonder README, .gitignore of licentie).
-Voer in deze projectmap uit; vervang de naam, het e-mailadres en de GitHub-URL door je eigen gegevens:
-
-```powershell
-git init -b main
-git config user.name "Jouw naam"
-git config user.email "jij@example.com"
-git add .
-git status
-git commit -m "Eerste versie"
-git remote add origin https://github.com/JOUW-NAAM/JOUW-REPO.git
-git push -u origin main
-```
-
-`.gitignore` houdt de Python-omgeving, tijdelijke bestanden en lokale secrets uit Git.
-Bekijk bij `git status` welke bestanden je gaat uploaden. Gebiedsbestanden kun je buiten deze map bewaren en later in de app uploaden.
-
-Ga naar [Streamlit Community Cloud](https://share.streamlit.io/) en verbind je GitHub-account.
-Klik op **Create app**, kies je repository, branch **main** en bestand **app.py**.
-Kies bij **Advanced settings** Python **3.13** en klik op **Deploy**.
-Streamlit installeert de pakketten uit `requirements.txt`; je hoeft `.venv` niet te uploaden.
-Zie ook de [Streamlit-deployhandleiding](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/deploy).
-
-Latere wijzigingen publiceren:
-
-```powershell
-git add .
-git commit -m "Beschrijf je wijziging"
-git push
-```
