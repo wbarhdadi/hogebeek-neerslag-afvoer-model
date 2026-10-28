@@ -9,6 +9,8 @@ import zipfile
 import geopandas as gpd
 import numpy as np
 import pandas as pd
+from rasterio.warp import transform
+from shapely.geometry import mapping
 
 
 def fingerprint(value):
@@ -113,6 +115,15 @@ def prepare_results(result, rain, reservoirs, inputs, catchments, config, signat
                 path = Path(directory)/f'max_waterdepth_catchment_{cid:02d}.tif'
                 reservoirs[cid].export_waterdepth(path, highest)
                 archive.write(path, f'max_waterdepth/{path.name}')
+    boundaries = catchments.to_crs('EPSG:4326')
+    map_areas = {}
+    for row in boundaries.itertuples():
+        cid = int(row.uitstroompunt_nummer)
+        outlet = inputs[cid]['outlet_mapping']
+        lon, lat = transform(reservoirs[cid].crs, 'EPSG:4326',
+                             [outlet['source_x']], [outlet['source_y']])
+        map_areas[cid] = dict(boundary=mapping(row.geometry), outlet=[lat[0], lon[0]])
     return dict(signature=signature, result=result, rain=rain.copy(deep=True), names=names,
+                map_areas=map_areas,
                 depths=depths, metadata=metadata, logs=list(logs), zip_bytes=output.getvalue(),
                 filename=f'hogebeek_resultaten_{signature[:12]}.zip')

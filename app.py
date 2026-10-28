@@ -13,6 +13,7 @@ from measures import apply_maatregelen
 from model import run_model
 from rainfall import fetch_waterinfo, read_rain_csv, scale_rain
 from reservoirs import build_reservoirs
+from result_map import result_map_html
 from stations import STATIONS
 
 
@@ -265,6 +266,21 @@ else:
                'Waterdiepte is de maximale diepte binnen het geselecteerde gebied.')
     st.caption('ZIP: debieten, stapvolumes, peilen, regen, maximale diepte-GeoTIFFs per gebied en runmetadata. '
                'De CSV-tijdstempels zijn intervalbegin in UTC; peilen gelden aan intervaleinde.')
+    st.subheader('Kaart maximale waterdiepte')
+    if cid not in saved.get('map_areas', {}):
+        st.info('Bereken opnieuw om de kaart toe te voegen aan deze eerder opgeslagen run.')
+    else:
+        try:
+            st.iframe(result_map_html(saved['zip_bytes'], cid, saved['map_areas'][cid]), height=620)
+        except Exception as exc:
+            st.warning('De kaart kon niet worden opgebouwd. De resultaten blijven beschikbaar in de ZIP.')
+            with st.expander('Technische foutinformatie kaart'):
+                st.code(f'{type(exc).__name__}: {exc}')
+        st.caption('Maximale waterdiepte over de volledige simulatie, inclusief de begintoestand. '
+                   'Geel: stroomgebied; rood: uitlaatpunt. Schakel GRB in via de laagkeuze rechtsboven. '
+                   'Orthofoto: meest recente beschikbare winteropname per locatie (Digitaal Vlaanderen). '
+                   'De achtergrondkaarten vereisen internet; de kaartweergave kan zijn verkleind, '
+                   'de GeoTIFF in de ZIP behoudt de oorspronkelijke resolutie.')
     with st.expander('Waterbalans en runinstellingen'):
         st.json(saved['metadata'])
     st.caption('Resultaten blijven bewaard tijdens deze sessie. Download de ZIP vóór het sluiten van de sessie.')

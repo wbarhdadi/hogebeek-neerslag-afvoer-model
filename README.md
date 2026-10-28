@@ -35,7 +35,8 @@ Op macOS/Linux: maak de omgeving met `python3.13 -m venv .venv` en gebruik `.ven
 1. Upload geodata (`.parquet`), catchments (`.gpkg`) en inlets (`.gpkg`). Deze gebiedsbestanden zijn niet meegeleverd.
 2. Kies **Waterinfo** en haal neerslag op, of kies **Eigen CSV** en upload een bui. Waterinfo heeft internet nodig.
 3. Klik op **Berekenen**.
-4. Bekijk de grafieken en download de resultaat-ZIP voordat je de sessie sluit.
+4. Bekijk de grafieken en de kaart met maximale waterdiepte voor het gekozen stroomgebied. De kaart toont de meest recente winterorthofoto, de gebiedsgrens en het uitlaatpunt; GRB is optioneel inschakelbaar. De kleurenlegende en transparantieschuiven staan op de kaart. De kaartachtergrond en kaartbibliotheek vereisen internet.
+5. Download de resultaat-ZIP voordat je de sessie sluit. De kaart gebruikt dezelfde maximale-waterdiepterasters als deze ZIP.
 
 Voor een eigen bui kun je [dit voorbeeld](examples/neerslag_15min.csv) gebruiken: 6 mm in een uur, met intervallen van 15 minuten.
 De CSV-kolommen zijn `timestamp,precipitation_mm`: tijdstip met tijdzone-offset en mm per interval. Neem ook droge intervallen op met waarde 0.
