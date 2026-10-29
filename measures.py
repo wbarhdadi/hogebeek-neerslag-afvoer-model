@@ -1,6 +1,7 @@
 from typing import Optional
 import geopandas as gpd
 import numpy as np
+import pandas as pd
 
 def apply_maatregelen(
     geodata: gpd.GeoDataFrame,
@@ -11,6 +12,7 @@ def apply_maatregelen(
     """
     Pas maatregelen toe op geodata:
     - behoud alleen maatregelen met niet-lege 'type'
+    - sla expliciet als 'niet_gemodelleerd' gemarkeerde objecten over
     - behoud enkel maatregelen die een stroomgebied snijden
     - log hoeveel maatregelen verwerkt worden
     - pas DTM / helling / runoff / Manning aan per maatregeltype.
@@ -24,8 +26,15 @@ def apply_maatregelen(
 
     # Enkel maatregelen met type
     maatregelen_gdf = maatregelen_gdf[~maatregelen_gdf["type"].isna()].copy()
+    niet_gemodelleerd = maatregelen_gdf["type"].eq("niet_gemodelleerd")
+    if niet_gemodelleerd.any():
+        log(
+            f"Maatregelen: {int(niet_gemodelleerd.sum())} object(en) zijn "
+            "nog niet gemodelleerd en worden niet doorgerekend."
+        )
+        maatregelen_gdf = maatregelen_gdf.loc[~niet_gemodelleerd].copy()
     if maatregelen_gdf.empty:
-        log("Geen maatregelen met ingevuld 'type' gevonden – niets toe te passen.")
+        log("Geen door te rekenen maatregelen over – niets toe te passen.")
         return geodata
 
     # Enkel maatregelen die een stroomgebied snijden
@@ -158,7 +167,7 @@ def apply_maatregelen(
                 if len(idxs) > 0:
                     geodata.loc[idxs, "runoff_ori_clipped"] = 0.0
 
-                    if hasattr(maatregel, "volume") and maatregel.volume is not None:
+                    if pd.notna(maatregel.get("volume")):
                         totale_oppervlakte = len(idxs) * (5 * 5)  # 5m x 5m
                         volume_m3 = float(maatregel.volume)
                         depth_lowering = volume_m3 / totale_oppervlakte
