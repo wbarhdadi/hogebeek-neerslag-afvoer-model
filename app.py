@@ -7,7 +7,7 @@ import streamlit as st
 from app_support import (code_identity, file_identity, fingerprint, prepare_results,
                          rain_identity, read_inputs)
 from charts import chart_spec, local_time, result_charts, time_axis
-from comparison import SCENARIOS, comparison_table, matching_runs, scenario
+from comparison import SCENARIOS, comparison_table, matching_runs, scenario, style_comparison_table
 from gis import preprocess_geodata
 from measures import apply_maatregelen
 from model import run_model
@@ -51,7 +51,16 @@ with cols[1]:
 with cols[2]:
     inlets_file = st.file_uploader('Inlets (.gpkg)', type=['gpkg'], key='inlets')
 
-with st.expander('Specialistische parameters en maatregelen'):
+measures_files = st.file_uploader('Maatregelen (alle shapefile-onderdelen, optioneel)',
+                                  type=['shp', 'dbf', 'shx', 'prj', 'cpg', 'qix'],
+                                  accept_multiple_files=True, key='measures')
+st.caption('Bereken eerst zonder maatregelen, upload daarna de maatregelen en bereken opnieuw. '
+           'Houd alle overige invoer en instellingen gelijk om de resultaten te vergelijken.')
+st.caption('Veld type: drempel (punt); gracht, houthaksel, houtkant, infiltratiestraat, swale (lijn); '
+           'bufferbekken, grasbufferstrook, ontharding, sponsakker, sponstuin (polygoon). '
+           'Upload per shapefile ook .dbf, .shx en .prj.')
+
+with st.expander('Specialistische parameters'):
     st.caption('Deze factoren wijzigen de gebiedseigenschappen. De neerslagfactor staat apart bij Bui.')
     cols = st.columns(3)
     with cols[0]:
@@ -67,12 +76,6 @@ with st.expander('Specialistische parameters en maatregelen'):
     timestamp_position = st.selectbox('Waterinfo-timestamp is intervalbegin of -einde', ['start', 'end'],
                                       key='timestamp_position',
                                       help='Historische bronconventie nog te bevestigen; start is de bestaande modelaanname.')
-    measures_files = st.file_uploader('Maatregelen (alle shapefile-onderdelen, optioneel)',
-                                      type=['shp', 'dbf', 'shx', 'prj', 'cpg', 'qix'],
-                                      accept_multiple_files=True, key='measures')
-    st.caption('Veld type: drempel (punt); gracht, houthaksel, houtkant, infiltratiestraat, swale (lijn); '
-               'bufferbekken, grasbufferstrook, ontharding, sponsakker, sponstuin (polygoon). '
-               'Upload per shapefile ook .dbf, .shx en .prj.')
 
 st.header('2. Bui')
 source = st.selectbox('Neerslagbron', ['Waterinfo', 'Eigen CSV'], key='rain_source')
@@ -246,8 +249,9 @@ else:
     if pair is not None:
         st.subheader('Runvergelijking')
         st.caption('Laatste geslaagde run zonder en met maatregelen, met dezelfde overige invoer. '
-                   'Verschil = met maatregelen − zonder maatregelen.')
-        st.table(comparison_table(pair, cid).style.format('{:.6g}', na_rep='n.v.t.'))
+                   'Verschil [%] = (met maatregelen − zonder maatregelen) / zonder maatregelen × 100. '
+                   'Bij een basiswaarde van 0: n.v.t.')
+        st.table(style_comparison_table(comparison_table(pair, cid)))
         st.caption('Tijd tot piekdebiet: uren vanaf de simulatiestart tot het intervalbegin van de eerste '
                    'hoogste debietwaarde. Bij uitsluitend nuldebiet: n.v.t.')
     elif all(label in st.session_state.run_history for label in SCENARIOS):

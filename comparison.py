@@ -42,5 +42,23 @@ def comparison_table(pair, cid):
         columns[label] = [hours, peak, float(np.max(saved['depths'][cid]))]
     table = pd.DataFrame(columns, index=['Tijd tot piekdebiet [uren]', 'Piekdebiet [m³/s]',
                                          'Piekwaterdiepte [m]'])
-    table['Verschil'] = table[WITH]-table[WITHOUT]
+    baseline = table[WITHOUT].replace(0, np.nan)
+    table['Verschil [%]'] = (table[WITH]-table[WITHOUT])/baseline*100
     return table
+
+
+def style_comparison_table(table):
+    """Color a delay green, but an increase in discharge or depth red."""
+    def difference_color(row):
+        difference = row['Verschil [%]']
+        color = ''
+        if pd.notna(difference) and difference != 0:
+            improvement = difference > 0 if row.name == 'Tijd tot piekdebiet [uren]' else difference < 0
+            color = 'color: #15803d' if improvement else 'color: #dc2626'
+        return ['', '', color]
+
+    return (table.style
+            .format({WITHOUT: '{:.6g}', WITH: '{:.6g}',
+                     'Verschil [%]': lambda value: f'{value:+.1f}%' if value != 0 else '0%'},
+                    na_rep='n.v.t.')
+            .apply(difference_color, axis=1))
